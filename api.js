@@ -3,13 +3,28 @@ const sql = require('mssql');
 const config = {
     user: 'sa',
     password: 'asksrf@7528',
-    server: 'SRVIFG2016',
+    server: '94.201.146.218',
     database: 'IFGDBTest',
     options: {
         encrypt: false, // For Azure databases, set this to true
         trustedConnection: true
     }
 };
+
+async function retrieveData(query){
+    try {
+        // `SELECT * FROM FixedAssets where isDeleted != 1`
+        await connectToDatabase();
+        const res = await queryDatabase(query);
+        return res;
+    }
+    catch(err) {
+        console.error('Error executing query:', err);
+        throw err;
+    } finally{
+        await closeConnection();
+    }
+}
 
 async function getAllUsers(userId = null){
     try {
@@ -34,12 +49,9 @@ async function connectToDatabase() {
     }
 }
 
-async function queryDatabase(UserId = null) {
+async function queryDatabase(query) {
     try {
-        var condition;
-        if(UserId != null)
-            condition = `where UserId = ${UserId}`;
-        const result = await sql.query(`SELECT * FROM Users ${condition}`);
+        const result = await sql.query(query);
         return result.recordset;
     } catch (err) {
         console.error('Error executing query:', err);
@@ -54,4 +66,4 @@ async function closeConnection() {
     }
 }
 
-module.exports = { getAllUsers,closeConnection,connectToDatabase }
+module.exports = { retrieveData }

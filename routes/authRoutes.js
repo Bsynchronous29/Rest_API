@@ -6,7 +6,7 @@ const userRoute = require('../routes/userRoutes');
 
 // Define authentication routes
 
-userList = [];
+const userList = [];
 
 router.post('/login', async (req, res) => {
   // Handle login/authentication logic
@@ -50,7 +50,7 @@ router.get('/users', async (req, resp) => {
     try {
         const users = await getAllUsers();
         userList.push(users);
-        resp.send(users);
+        return resp.send(users);
     } catch (err) {
         console.error('Error getting users:', err);
         resp.status(500).send('Internal Server Error');

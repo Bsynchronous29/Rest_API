@@ -3,9 +3,12 @@ const express = require('express');
 
 const router = express.Router();
 
+
+
 router.get('/users', async (req, resp) => {
     try {
-        users = await getAllUsers();
+        console.log('users home');
+        const users = await getAllUsers();
         resp.send(users);
     } catch (err) {
         console.error('Error getting users:', err);
@@ -13,24 +16,48 @@ router.get('/users', async (req, resp) => {
     }
 });
 
-function getUsers(){
-    return users;
-}
+router.get('/users/user', async (req, resp) => {
+    try {
+        console.log('user and password');
+        const users = await getAllUsers();
+        const username = req.query.username;
+        const password = req.query.password;
+        const user = users.find(u => u.Username === username && u.Password === password);
+
+        if (resp.status == 200) {
+            resp.send(user);
+            resp.status(404).send('User not found');
+        } else {
+            resp.send(user);
+        }
+    } catch (err) {
+        console.error('Error getting user by username and password:', err);
+        resp.status(500).send('Internal Server Error');
+    }
+});
 
 router.get('/users/id=:id', async (req, resp) => {
     try {
         const users = await getAllUsers();
-        resp.send(users);
+        const id = req.params.id;
+        const user = users.find(c => c.UserId === id);
+
+        if (!user) {
+            resp.status(404).send('User not found');
+        } else {
+            resp.send(user);
+        }
     } catch (err) {
-        console.error('Error getting users:', err);
+        console.error('Error getting user by ID:', err);
         resp.status(500).send('Internal Server Error');
     }
 });
 
-router.get('/users/:username', async (req, resp) => {
+router.get('/users/username=:username', async (req, resp) => {
     try {
+        console.log('username');
         const users = await getAllUsers();
-        const userName = parseInt(req.params.username);
+        const userName = req.params.username;
         const user = users.find(u => u.Username === userName);
 
         if (!user) {
@@ -39,19 +66,20 @@ router.get('/users/:username', async (req, resp) => {
             resp.send(user);
         }
     } catch (err) {
-        console.error('Error getting users:', err);
+        console.error('Error getting user by username:', err);
         resp.status(500).send('Internal Server Error');
     }
 });
 
+
+
+
 async function getAllUsers(){
-    users = dbConn.retrieveData(`Select * from Users WHERE isDeleted != 1`);
-    return getUsers();
+    return dbConn.retrieveData(`Select * from Users WHERE isDeleted != 1`);
 }
 
 module.exports = router;
-module.exports.getAllUsers = getAllUsers();
-module.exports.getUsers = getUsers();
+// module.exports.getUsers = getUsers();
 
 // const express = require('express');
 // const router = express.Router();

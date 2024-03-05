@@ -25,7 +25,7 @@ router.post('/login', async (req, res) => {
     
     }
     catch(err){
-
+        
     }
 });
 
@@ -57,8 +57,31 @@ router.get('/users', async (req, resp) => {
     }
 });
 
+router.get('/login/username=:username&password=:password', async (req, resp) => {
+    try {
+        const username = req.params.username;
+        const pass = req.params.password;
+        console.log(username);
+        console.log(pass);
+        const user = await getUserByUsername(username);
+        console.log(user);
+        if(user!=null && user[0].Password == pass){
+            return resp.send(user);
+        }
+        else{
+            return resp.send('Invalid Password');
+        }
+    } catch (err) {
+        console.error('Error getting users:', err);
+        resp.status(500).send('Internal Server Error');
+    }
+});
+
 async function getAllUsers(){
     return dbConn.retrieveData(`Select * from Users WHERE isDeleted != 1`);
+}
+async function getUserByUsername(username){
+    return dbConn.retrieveData(`Select * from Users WHERE isDeleted != 1 and username = '${username}'`);
 }
 
 router.post('/register', async (req, res) => {

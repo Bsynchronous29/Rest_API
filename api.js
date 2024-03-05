@@ -26,20 +26,6 @@ async function retrieveData(query){
     }
 }
 
-async function getAllUsers(userId = null){
-    try {
-        await connectToDatabase();
-        const res = await queryDatabase();
-        return res;
-    }
-    catch(err) {
-        console.error('Error executing query:', err);
-        throw err;
-    } finally{
-        await closeConnection();
-    }
-}
-
 async function connectToDatabase() {
     try {
         await sql.connect(config);

@@ -5,7 +5,7 @@ const router = express.Router();
 
 
 
-router.get('/users', async (req, resp) => {
+router.get('/', async (req, resp) => {
     try {
         console.log('users home');
         const users = await getAllUsers();
@@ -16,7 +16,7 @@ router.get('/users', async (req, resp) => {
     }
 });
 
-router.get('/users/user', async (req, resp) => {
+router.get('/user', async (req, resp) => {
     try {
         console.log('user and password');
         const users = await getAllUsers();
@@ -36,7 +36,7 @@ router.get('/users/user', async (req, resp) => {
     }
 });
 
-router.get('/users/id=:id', async (req, resp) => {
+router.get('/id=:id', async (req, resp) => {
     try {
         const users = await getAllUsers();
         const id = req.params.id;
@@ -53,7 +53,7 @@ router.get('/users/id=:id', async (req, resp) => {
     }
 });
 
-router.get('/users/username=:username', async (req, resp) => {
+router.get('/username=:username', async (req, resp) => {
     try {
         console.log('username');
         const users = await getAllUsers();
@@ -71,62 +71,8 @@ router.get('/users/username=:username', async (req, resp) => {
     }
 });
 
-
-
-
 async function getAllUsers(){
     return dbConn.retrieveData(`Select * from Users WHERE isDeleted != 1`);
 }
 
 module.exports = router;
-// module.exports.getUsers = getUsers();
-
-// const express = require('express');
-// const router = express.Router();
-// const swaggerJSDoc = require('swagger-jsdoc');
-// const swaggerUi = require('swagger-ui-express');
-
-// const options = {
-//     definition : {
-//         openapi : '3.0.0',
-//         info: {
-//             title: 'Node JS Api Project',
-//             version: '1.0.0'
-//         },
-//         servers: [
-//             {
-//                 api: 'http//localhost:3030/'
-//             },
-//         ],
-//         apis: ['./user.js']
-//     }
-// };
-
-// const swaggerSpec = swaggerJSDoc(options);
-// app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-
-// app.get('/', (req, res) => {
-//     resp.send('Welcome to IFG API');
-// });
-
-// app.get('/api/users', (req, res) => {
-//     database.collection('user').find({}).toArray((err, result) => {
-//         if(err) throw err
-//         resp.send(result)
-//     }) 
-// });
-
-// const getData = () => {
-//     return [
-//         { user: 'root', password: 'root' },
-//         { user: 'admin', password: 'admin' }
-//     ];
-// };
-
-// router.get('/', (req, res) => {
-//     const data = getData();
-//     res.json(data);
-// });
-
-// Export the getData function for use in index.js
-// module.exports = { getData, router };

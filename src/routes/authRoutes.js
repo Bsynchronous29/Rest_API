@@ -57,25 +57,35 @@ router.get('/users', async (req, resp) => {
     }
 });
 
-router.get('/login/username=:username&password=:password', async (req, resp) => {
+router.get('/login/', async (req, res) => {
     try {
-        const username = req.params.username;
-        const pass = req.params.password;
+        const username = req.query.username;
+        const password = req.query.password;
         console.log(username);
-        console.log(pass);
-        const user = await getUserByUsername(username);
-        console.log(user);
-        if(user!=null && user[0].Password == pass){
-            return resp.send(user);
-        }
-        else{
-            return resp.send('Invalid Password');
+        console.log(password);
+        
+        // Perform authentication logic here
+        var user = await getUserByUsername(username);
+
+        console.log(`User: ${user}`);
+        console.log(`Username: ${user[0].Username}`);
+        console.log(`Password: ${user[0].Password}`);
+        console.log(`${username} === ${user[0].Username}`);
+
+        // Sample authentication logic
+        if (username.toString() === user[0].Username && password.toString() === user[0].Password) {
+            // If authentication succeeds, send success response
+            res.status(200).send('Authentication successful');
+        } else {
+            // If authentication fails, send error response
+            res.status(401).send('Invalid username or password');
         }
     } catch (err) {
-        console.error('Error getting users:', err);
-        resp.status(500).send('Internal Server Error');
+        console.error('Error during authentication:', err);
+        res.status(500).send('Internal Server Error');
     }
 });
+
 
 async function getAllUsers(){
     return dbConn.retrieveData(`Select * from Users WHERE isDeleted != 1`);

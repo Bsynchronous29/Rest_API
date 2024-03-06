@@ -3,7 +3,7 @@ const express = require('express');
 
 const router = express.Router();
 
-router.get('/machines', async (req, resp) => {
+router.get('/', async (req, resp) => {
     try {
         const machines = await getAllFixedAssets();
         resp.send(machines);
@@ -13,7 +13,7 @@ router.get('/machines', async (req, resp) => {
     }
 });
 
-router.get('/machines/projectNo=:projectNo', async (req, resp) => {
+router.get('/projectNo=:projectNo', async (req, resp) => {
     try {
         const projectNo = req.params.projectNo;
         const machines = await getMachinesByProject(projectNo);
@@ -25,7 +25,7 @@ router.get('/machines/projectNo=:projectNo', async (req, resp) => {
     
 });
 
-router.get('/machines/search', async (req, res) => {
+router.get('/search', async (req, res) => {
     try {
         console.log('machine search');
         const { keyword, status } = req.query;

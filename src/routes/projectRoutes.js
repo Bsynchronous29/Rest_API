@@ -3,17 +3,19 @@ const express = require('express');
 
 const router = express.Router();
 
-router.get('/projects', async (req, resp) => {
+router.get('/', async (req, resp) => {
     try {
         const projects = await getProjects();
-        resp.send(projects);
+        console.log(projects);
+        // resp.send(projects);
+        resp.json(projects);
     } catch (err) {
         console.error('Error getting projects:', err);
         resp.status(500).send('Internal Server Error');
     }
 });
 
-router.get('/projects/:id', async (req, resp) => {
+router.get('/:id', async (req, resp) => {
     try {
         const projects = await getProjects();
 
@@ -28,7 +30,7 @@ router.get('/projects/:id', async (req, resp) => {
     }
 });
 
-router.get('/project/search', async (req, res) => {
+router.get('/search', async (req, res) => {
     try {
         console.log('project search');
         const { keyword, status } = req.query;
@@ -53,7 +55,7 @@ router.get('/project/search', async (req, res) => {
     }
 });
 
-router.get('/projects/search/project=:projectNo', async (req, resp) => {
+router.get('/search/project=:projectNo', async (req, resp) => {
     try {
         const projectNo = req.params.projectNo;
 

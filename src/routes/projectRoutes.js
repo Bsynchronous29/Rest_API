@@ -3,16 +3,63 @@ const express = require('express');
 
 const router = express.Router();
 
-router.get('/', async (req, resp) => {
+// router.get('/', async (req, resp) => {
+//     try {
+//         console.log('All Projects');
+//         const projects = await searchProject();
+//         resp.json(projects);
+//     } catch (err) {
+//         console.error('Error getting projects:', err);
+//         resp.status(500).send('Internal Server Error');
+//     }
+// });
+
+router.get('/search', async (req, resp) => {
     try {
-        const projects = await getProjects();
-        console.log(projects);
-        // resp.send(projects);
-        resp.json(projects);
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const searchString = req.query.q;
+
+        const { projects, totalCount } = await searchProject(searchString, page, limit);
+        resp.send({ projects, totalCount });
+
     } catch (err) {
         console.error('Error getting projects:', err);
         resp.status(500).send('Internal Server Error');
     }
+
+});
+
+router.get('/', async (req, resp) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const searchString = req.query.q;
+
+        const machines = await searchProject(searchString, page, limit);
+        resp.send(machines);
+
+    } catch (err) {
+        console.error('Error getting machines:', err);
+        resp.status(500).send('Internal Server Error');
+    }
+
+});
+
+router.get('/', async (req, resp) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const searchString = req.query.q;
+
+        const machines = await searchProject(searchString, page, limit);
+        resp.send(machines);
+
+    } catch (err) {
+        console.error('Error getting machines:', err);
+        resp.status(500).send('Internal Server Error');
+    }
+
 });
 
 router.get('/:id', async (req, resp) => {
@@ -30,57 +77,34 @@ router.get('/:id', async (req, resp) => {
     }
 });
 
-router.get('/search', async (req, res) => {
-    try {
-        console.log('project search');
-        const { keyword, status } = req.query;
-        // Assuming getAllMachines() is a function that retrieves all machines from the database
-        const projects = await searchProject(projectNo)
-
-        // Filter machines based on search criteria
-        const filteredProjects = projects.filter(machine => {
-            // Check if keyword matches machine name or description
-            const matchesKeyword = projects.ProjectNo.includes(keyword) || projects.Name.includes(keyword);
-            // Check if machine status matches the provided status
-            const matchesStatus = status ? projects.status === status : true;
-
-            return matchesKeyword && matchesStatus;
-        });
-
-        res.json(filteredProjects);
-        console.log(filteredProjects);
-    } catch (err) {
-        console.error('Error searching machines:', err);
-        res.status(500).send('Internal Server Error');
+async function searchProject(searchString, page, limit) {
+    if (searchString === undefined) {
+        searchString = '';
     }
-});
+    const offset = (page - 1) * limit;
 
-router.get('/search/project=:projectNo', async (req, resp) => {
-    try {
-        const projectNo = req.params.projectNo;
+    var temp = `SELECT * 
+        FROM Projects 
+        WHERE isDeleted != 1 and 
+            (ProjectNo like '%${searchString}%' or 
+            Name like '%${searchString}%' or 
+            WorkScope like '%${searchString}%' or 
+            FileName like '%${searchString}%')
+        ORDER BY ProjectId DESC
+        OFFSET ${offset} ROWS 
+        FETCH NEXT ${limit} ROWS ONLY`;
 
-        console.log(`Project Search ${projectNo}`);
-        const projects = await searchProject(projectNo);
-        resp.send(projects);
-    } catch (err) {
-        console.error('Error getting machines:', err);
-        resp.status(500).send('Internal Server Error');
-    }
-    
-});
+    const projects = await dbConn.retrieveData(temp);
 
-async function getProjects(){
-    return dbConn.retrieveData(`SELECT * FROM Projects where isDeleted != 1`);
-}
+    // Count total number of projects matching the search criteria
+    const countQuery = `SELECT COUNT(*) AS total FROM Projects WHERE isDeleted != 1 and 
+        (ProjectNo like '%${searchString}%' or 
+        Name like '%${searchString}%' or 
+        WorkScope like '%${searchString}%' or 
+        FileName like '%${searchString}%')`;
+    const [{ total }] = await dbConn.retrieveData(countQuery);
 
-async function searchProject(searchString){
-    var temp = `SELECT * FROM Projects where isDeleted != 1 and 
-    ProjectNo like '%${searchString}%' or 
-    Name like '%${searchString}%' or 
-    WorkScope like '%${searchString}%' or 
-    FileName like '%${searchString}%' order by projectid desc`;
-    console.log(temp);
-    return dbConn.retrieveData(temp);
+    return { projects, totalCount: Math.ceil(total / limit) };
 }
 
 module.exports = router;

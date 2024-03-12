@@ -34,6 +34,18 @@ async function connectToDatabase() {
         console.error('Error connecting to the database:', err);
     }
 }
+async function executeSqlQuery(query, params) {
+    try {
+        await connectToDatabase();
+        const result = await sql.query(query, params);
+        return result.recordset;
+    } catch (err) {
+        console.error('Error executing query:', err);
+        throw err;
+    } finally {
+        await closeConnection();
+    }
+}
 
 async function queryDatabase(query) {
     try {
@@ -52,4 +64,4 @@ async function closeConnection() {
     }
 }
 
-module.exports = { retrieveData }
+module.exports = { retrieveData, executeSqlQuery }
